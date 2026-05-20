@@ -1,0 +1,22 @@
+[
+  { "id": 1,  "name": "흰 티셔츠",       "category": "tops",        "filename": "tops/001.png" },
+  { "id": 2,  "name": "네이비 후드",     "category": "tops",        "filename": "tops/002.png" },
+  { "id": 3,  "name": "체크 셔츠",       "category": "tops",        "filename": "tops/003.png" },
+  { "id": 4,  "name": "회색 스웻셔츠",   "category": "tops",        "filename": "tops/004.png" },
+  { "id": 5,  "name": "가죽 자켓",       "category": "tops",        "filename": "tops/005.png" },
+  { "id": 6,  "name": "청바지",           "category": "bottoms",     "filename": "bottoms/001.png" },
+  { "id": 7,  "name": "검정 슬랙스",     "category": "bottoms",     "filename": "bottoms/002.png" },
+  { "id": 8,  "name": "카키 카고 반바지","category": "bottoms",     "filename": "bottoms/003.png" },
+  { "id": 9,  "name": "올리브 슬랙스",   "category": "bottoms",     "filename": "bottoms/004.png" },
+  { "id": 10, "name": "회색 조거팬츠",   "category": "bottoms",     "filename": "bottoms/005.png" },
+  { "id": 11, "name": "브라운 부츠",     "category": "shoes",       "filename": "shoes/1_left.png" },
+  { "id": 12, "name": "로퍼",             "category": "shoes",       "filename": "shoes/2_left.png" },
+  { "id": 13, "name": "러닝화",           "category": "shoes",       "filename": "shoes/3_left.png" },
+  { "id": 14, "name": "흰 스니커즈",     "category": "shoes",       "filename": "shoes/4_left.png" },
+  { "id": 15, "name": "슬리퍼",           "category": "shoes",       "filename": "shoes/5_left.png" },
+  { "id": 16, "name": "빨강 캡",         "category": "accessories", "filename": "accessories/001.png" },
+  { "id": 17, "name": "회색 비니",       "category": "accessories", "filename": "accessories/002.png" },
+  { "id": 18, "name": "검정 페도라",     "category": "accessories", "filename": "accessories/003.png" },
+  { "id": 19, "name": "버킷햇",           "category": "accessories", "filename": "accessories/004.png" },
+  { "id": 20, "name": "뉴스보이 캡",     "category": "accessories", "filename": "accessories/005.png" }
+]
