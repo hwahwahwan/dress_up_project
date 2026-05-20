@@ -1,4 +1,33 @@
-docs/*
+# OS
 .DS_Store
+.DS_Store?
+._*
+Thumbs.db
+
+# 환경변수
+.env
+.env.local
+.env.*.local
+
+# 문서 (로컬용)
+docs/*
+
+# ───── Frontend (Node / Vite) ─────
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.vite/
+frontend/.cache/
+frontend/*.log
+
+# ───── Backend (C / GCC) ─────
+backend/*.o
+backend/*.a
 backend/server
-backend/src/*.o
+backend/build/
+
+# 에디터
+.vscode/
+.idea/
+*.swp
+*~
