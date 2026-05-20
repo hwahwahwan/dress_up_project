@@ -21,6 +21,7 @@ frontend/.cache/
 frontend/*.log
 
 # ───── Backend (C / GCC) ─────
+backend/**/*.o
 backend/*.o
 backend/*.a
 backend/server
