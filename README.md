@@ -1,1 +1,1 @@
-# dress_up_project
+# 자료구조 기말 프로젝트
