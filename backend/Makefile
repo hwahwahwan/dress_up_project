@@ -1,6 +1,6 @@
 CC      = gcc
-CFLAGS  = -Wall -Wextra -I./include
-LDFLAGS = -lmicrohttpd
+CFLAGS  = -Wall -Wextra -I./include $(shell pkg-config --cflags libmicrohttpd 2>/dev/null)
+LDFLAGS = $(shell pkg-config --libs libmicrohttpd 2>/dev/null || echo -lmicrohttpd)
 
 SRCS = src/main.c \
        src/hashmap.c \
