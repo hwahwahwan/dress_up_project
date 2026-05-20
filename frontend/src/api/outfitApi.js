@@ -22,20 +22,32 @@ import { ITEMS, ITEMS_BY_ID, SLOTS } from '../data/items.js';
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 export const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 
+// fit, filename_r 등 프론트 전용 필드를 로컬 데이터에서 보완
+function mergeFrontendFields(item) {
+  const local = ITEMS_BY_ID[item.id] ?? {};
+  return {
+    ...item,
+    fit: local.fit ?? {},
+    ...(local.filename_r ? { filename_r: local.filename_r } : {}),
+  };
+}
+
 // ─── public API ─────────────────────────────────────────────────────────────
 
 // GET /items — 전체 아이템 목록
 export async function getItems() {
   if (USE_MOCK) return ITEMS;
   const r = await fetch(`${BASE_URL}/items`);
-  return r.json();
+  const serverItems = await r.json();
+  return serverItems.map((item) => mergeFrontendFields(item));
 }
 
 // GET /items/:category — 카테고리별 필터링
 export async function getItemsByCategory(category) {
   if (USE_MOCK) return ITEMS.filter((i) => i.category === category);
   const r = await fetch(`${BASE_URL}/items/${category}`);
-  return r.json();
+  const serverItems = await r.json();
+  return serverItems.map((item) => mergeFrontendFields(item));
 }
 
 // GET /outfit — 현재 착용 상태 조회 (mount 시 동기화용)
