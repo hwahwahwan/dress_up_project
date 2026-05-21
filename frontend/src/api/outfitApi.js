@@ -85,6 +85,16 @@ export async function resetOutfit() {
   return r.json();
 }
 
+// POST /api/save-fit — 개발 전용, FitEditor 에서 items.js fit 값 저장
+export async function saveFit(id, fit) {
+  const r = await fetch('/api/save-fit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, fit }),
+  });
+  return r.json();
+}
+
 // 아이템 이미지 URL (프론트 public/assets 에서 직접 서빙 — C 서버 무관)
 export function getItemImageUrl(filename) {
   return `/assets/items/${filename}`;

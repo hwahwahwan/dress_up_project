@@ -63,6 +63,13 @@ export const ITEMS = [
     fit: { top: 37, width: 70 } },
 ];
 
+// 캔버스 크기 — CharacterView, FitEditor 에서 공유하는 단일 출처
+export const CANVAS_W = 400;
+export const CANVAS_H = 520;
+
+// 신발 좌우 분리 시 기본 dx (각 발이 중앙에서 떨어진 거리 px)
+export const DEFAULT_SHOE_DX = 38;
+
 // 슬롯 이름 목록 — 여러 파일에서 공유하는 단일 출처
 export const SLOTS = ['tops', 'bottoms', 'shoes', 'accessories'];
 

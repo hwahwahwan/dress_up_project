@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import useOutfit from './hooks/useOutfit.js';
 import { getItems, USE_MOCK } from './api/outfitApi.js';
-import { CATEGORIES } from './data/items.js';
+import { CATEGORIES, SLOTS } from './data/items.js';
 import CharacterView from './components/CharacterView.jsx';
 import CategoryTabs from './components/CategoryTabs.jsx';
 import ItemGrid from './components/ItemGrid.jsx';
@@ -42,12 +42,10 @@ export default function App() {
   );
 
   // 카테고리별 착용 여부 (탭 우측 도트 표시용)
-  const slotFilled = useMemo(() => ({
-    tops:        !!outfit.equipped.tops,
-    bottoms:     !!outfit.equipped.bottoms,
-    shoes:       !!outfit.equipped.shoes,
-    accessories: !!outfit.equipped.accessories,
-  }), [outfit.equipped]);
+  const slotFilled = useMemo(() =>
+    Object.fromEntries(SLOTS.map((s) => [s, !!outfit.equipped[s]])),
+    [outfit.equipped]
+  );
 
   return (
     <div className="app">
