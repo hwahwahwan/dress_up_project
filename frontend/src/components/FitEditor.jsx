@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { SLOTS, resolveFit } from '../data/items.js';
+import { SLOTS, resolveFit, CANVAS_H, DEFAULT_SHOE_DX } from '../data/items.js';
+import { saveFit } from '../api/outfitApi.js';
 
 export default function FitEditor({ equipped, fitOverrides, onFitChange }) {
   const activeSlots = SLOTS.filter((s) => equipped[s]);
@@ -29,11 +30,7 @@ export default function FitEditor({ equipped, fitOverrides, onFitChange }) {
         const f = resolveFit(it, fitOverrides);
         const fitToSave = { top: f.top ?? 0, width: f.width ?? 100 };
         if (f.dx != null && f.dx !== 0) fitToSave.dx = f.dx;
-        return fetch('/api/save-fit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: it.id, fit: fitToSave }),
-        });
+        return saveFit(it.id, fitToSave);
       }));
       setCopied(true);
       copiedTimer.current = setTimeout(() => setCopied(false), 2000);
@@ -81,7 +78,7 @@ export default function FitEditor({ equipped, fitOverrides, onFitChange }) {
             top
             <span style={valStyle}>{fit.top ?? 0}</span>
           </label>
-          <input type="range" min={0} max={520} value={fit.top ?? 0}
+          <input type="range" min={0} max={CANVAS_H} value={fit.top ?? 0}
             onChange={(e) => update('top', e.target.value)} style={sliderStyle} />
 
           {/* width 슬라이더 */}
@@ -97,12 +94,12 @@ export default function FitEditor({ equipped, fitOverrides, onFitChange }) {
             <>
               <label style={labelStyle}>
                 {activeSlot === 'shoes' ? '발 간격' : 'dx (좌우)'}
-                <span style={valStyle}>{fit.dx ?? (activeSlot === 'shoes' ? 38 : 0)}</span>
+                <span style={valStyle}>{fit.dx ?? (activeSlot === 'shoes' ? DEFAULT_SHOE_DX : 0)}</span>
               </label>
               <input type="range"
                 min={activeSlot === 'shoes' ? 10 : -80}
                 max={activeSlot === 'shoes' ? 80 : 80}
-                value={fit.dx ?? (activeSlot === 'shoes' ? 38 : 0)}
+                value={fit.dx ?? (activeSlot === 'shoes' ? DEFAULT_SHOE_DX : 0)}
                 onChange={(e) => update('dx', e.target.value)} style={sliderStyle} />
             </>
           )}
@@ -116,7 +113,7 @@ export default function FitEditor({ equipped, fitOverrides, onFitChange }) {
               onChange={(e) => update('width', e.target.value)}
               style={numInputStyle} placeholder="width" />
             {(activeSlot === 'accessories' || activeSlot === 'shoes') && (
-              <input type="number" value={fit.dx ?? (activeSlot === 'shoes' ? 38 : 0)}
+              <input type="number" value={fit.dx ?? (activeSlot === 'shoes' ? DEFAULT_SHOE_DX : 0)}
                 onChange={(e) => update('dx', e.target.value)}
                 style={numInputStyle} placeholder="dx" />
             )}

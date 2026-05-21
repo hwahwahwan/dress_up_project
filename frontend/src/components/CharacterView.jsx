@@ -12,11 +12,8 @@
 
 // shoes → bottoms → tops → accessories 순서로 레이어
 // (shoes 먼저 깔고, bottoms가 신발 윗부분 덮고, tops가 바지 허리 위로 덮임)
-import { LAYER_ORDER, resolveFit } from '../data/items.js';
+import { LAYER_ORDER, resolveFit, CANVAS_W, CANVAS_H, DEFAULT_SHOE_DX } from '../data/items.js';
 import { getCharacterImageUrl, getItemImageUrl } from '../api/outfitApi.js';
-
-const CANVAS_W = 400;
-const CANVAS_H = 520;
 
 function makeLayerStyle(f, dxOverride, zIndex) {
   return {
@@ -51,7 +48,7 @@ export default function CharacterView({ equipped, fitOverrides = {} }) {
 
         // 좌우 분리 신발
         if (item.filename_r) {
-          const dx = f.dx ?? 38;
+          const dx = f.dx ?? DEFAULT_SHOE_DX;
           return [
             <img key={`${slot}-L`} src={getItemImageUrl(item.filename)}   alt={`${item.name} L`}
               className="char-layer" draggable={false} style={makeLayerStyle(f, -dx, z)} />,
