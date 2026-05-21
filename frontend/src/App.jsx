@@ -107,7 +107,7 @@ export default function App() {
       <footer className="app__footer">
         {USE_MOCK
           ? '백엔드 미연결 — mock 데이터로 동작 중 (.env 의 VITE_USE_MOCK=false 로 전환)'
-          : '백엔드 연결됨'}
+          : 'made by @hwahwahwan · @rinio118'}
       </footer>
     </div>
   );
