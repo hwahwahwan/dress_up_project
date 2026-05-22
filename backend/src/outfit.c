@@ -4,6 +4,16 @@
 #include <ctype.h>
 #include "outfit.h"
 
+/* ─── 상수 ─── */
+#define NUM_CATEGORIES  4
+#define JSON_ITEM_CAP   256
+#define JSON_ARRAY_CAP  4096
+#define JSON_OUTFIT_CAP 2048
+
+static const char *CATEGORIES[NUM_CATEGORIES] = {
+    "tops", "bottoms", "shoes", "accessories"
+};
+
 /* ─── 전역 자료구조 ─── */
 static HashMap    *g_items   = NULL;
 static LinkedList *g_outfit  = NULL;
@@ -82,7 +92,7 @@ static int load_items(const char *path) {
     return 1;
 }
 
-/* ─── JSON 빌더 ─── */
+/* ─── JSON 빌더 헬퍼 ─── */
 
 static void item_to_json(const Item *item, char *buf, int len) {
     snprintf(buf, len,
@@ -90,19 +100,50 @@ static void item_to_json(const Item *item, char *buf, int len) {
         item->id, item->name, item->category, item->filename);
 }
 
-/* 현재 outfit → JSON (카테고리 4개, 미착용은 null) */
+static char *make_error_json(const char *msg) {
+    char buf[128];
+    snprintf(buf, sizeof(buf), "{\"error\":\"%s\"}", msg);
+    return strdup(buf);
+}
+
+/* Item** 배열 → JSON 배열 */
+static char *item_ptrs_to_json_array(Item **items, int count) {
+    char buf[JSON_ARRAY_CAP] = "[";
+    for (int i = 0; i < count; i++) {
+        char ij[JSON_ITEM_CAP];
+        item_to_json(items[i], ij, sizeof(ij));
+        if (i > 0) strncat(buf, ",", sizeof(buf) - strlen(buf) - 1);
+        strncat(buf, ij, sizeof(buf) - strlen(buf) - 1);
+    }
+    strncat(buf, "]", sizeof(buf) - strlen(buf) - 1);
+    return strdup(buf);
+}
+
+/* Item* 배열 → JSON 배열 */
+static char *items_to_json_array(Item *items, int count) {
+    char buf[JSON_ARRAY_CAP] = "[";
+    for (int i = 0; i < count; i++) {
+        char ij[JSON_ITEM_CAP];
+        item_to_json(&items[i], ij, sizeof(ij));
+        if (i > 0) strncat(buf, ",", sizeof(buf) - strlen(buf) - 1);
+        strncat(buf, ij, sizeof(buf) - strlen(buf) - 1);
+    }
+    strncat(buf, "]", sizeof(buf) - strlen(buf) - 1);
+    return strdup(buf);
+}
+
+/* 현재 outfit → JSON (미착용 카테고리는 null) */
 static char *build_outfit_json(void) {
-    const char *cats[] = { "tops", "bottoms", "shoes", "accessories" };
-    char buf[2048] = "{";
-    for (int i = 0; i < 4; i++) {
-        Item *item = linked_list_get_by_category(g_outfit, cats[i]);
-        char  entry[512];
+    char buf[JSON_OUTFIT_CAP] = "{";
+    for (int i = 0; i < NUM_CATEGORIES; i++) {
+        Item *item = linked_list_get_by_category(g_outfit, CATEGORIES[i]);
+        char  entry[JSON_ITEM_CAP + 32];
         if (item) {
-            char ij[256];
+            char ij[JSON_ITEM_CAP];
             item_to_json(item, ij, sizeof(ij));
-            snprintf(entry, sizeof(entry), "%s\"%s\":%s", i ? "," : "", cats[i], ij);
+            snprintf(entry, sizeof(entry), "%s\"%s\":%s", i ? "," : "", CATEGORIES[i], ij);
         } else {
-            snprintf(entry, sizeof(entry), "%s\"%s\":null", i ? "," : "", cats[i]);
+            snprintf(entry, sizeof(entry), "%s\"%s\":null", i ? "," : "", CATEGORIES[i]);
         }
         strncat(buf, entry, sizeof(buf) - strlen(buf) - 1);
     }
@@ -123,15 +164,12 @@ static OutfitState capture_state(void) {
 }
 
 static void restore_state(OutfitState s) {
+    int ids[NUM_CATEGORIES] = { s.tops_id, s.bottoms_id, s.shoes_id, s.accessories_id };
     linked_list_clear(g_outfit);
-    int ids[4] = { s.tops_id, s.bottoms_id, s.shoes_id, s.accessories_id };
-    const char *cats[4] = { "tops", "bottoms", "shoes", "accessories" };
-    for (int i = 0; i < 4; i++) {
-        if (ids[i] != -1) {
-            Item *item = hashmap_get(g_items, ids[i]);
-            if (item) linked_list_append(g_outfit, *item);
-        }
-        (void)cats[i];
+    for (int i = 0; i < NUM_CATEGORIES; i++) {
+        if (ids[i] == -1) continue;
+        Item *item = hashmap_get(g_items, ids[i]);
+        if (item) linked_list_append(g_outfit, *item);
     }
 }
 
@@ -156,12 +194,12 @@ void outfit_cleanup(void) {
 /* ─── API 핸들러 ─── */
 
 char *outfit_get_all_items(void) {
-    char buf[4096] = "[";
+    char buf[JSON_ARRAY_CAP] = "[";
     int  first = 1;
     for (int i = 0; i < TABLE_SIZE; i++) {
         HashNode *node = g_items->buckets[i];
         while (node) {
-            char ij[256];
+            char ij[JSON_ITEM_CAP];
             item_to_json(&node->item, ij, sizeof(ij));
             if (!first) strncat(buf, ",", sizeof(buf) - strlen(buf) - 1);
             strncat(buf, ij, sizeof(buf) - strlen(buf) - 1);
@@ -176,16 +214,9 @@ char *outfit_get_all_items(void) {
 char *outfit_get_items_by_category(const char *category) {
     int    count = 0;
     Item **items = hashmap_get_by_category(g_items, category, &count);
-    char   buf[2048] = "[";
-    for (int i = 0; i < count; i++) {
-        char ij[256];
-        item_to_json(items[i], ij, sizeof(ij));
-        if (i > 0) strncat(buf, ",", sizeof(buf) - strlen(buf) - 1);
-        strncat(buf, ij, sizeof(buf) - strlen(buf) - 1);
-    }
-    strncat(buf, "]", sizeof(buf) - strlen(buf) - 1);
+    char  *result = item_ptrs_to_json_array(items, count);
     free(items);
-    return strdup(buf);
+    return result;
 }
 
 char *outfit_get_current(void) {
@@ -194,7 +225,7 @@ char *outfit_get_current(void) {
 
 char *outfit_equip(int id) {
     Item *item = hashmap_get(g_items, id);
-    if (!item) return strdup("{\"error\":\"item not found\"}");
+    if (!item) return make_error_json("item not found");
     stack_push(g_undo, capture_state());
     linked_list_append(g_outfit, *item);
     queue_enqueue(g_history, *item);
@@ -209,7 +240,7 @@ char *outfit_unequip(const char *category) {
 
 char *outfit_undo(void) {
     if (stack_is_empty(g_undo))
-        return strdup("{\"error\":\"nothing to undo\"}");
+        return make_error_json("nothing to undo");
     restore_state(stack_pop(g_undo));
     return build_outfit_json();
 }
@@ -223,14 +254,7 @@ char *outfit_reset(void) {
 char *outfit_get_history(void) {
     int   count = 0;
     Item *arr   = queue_to_array(g_history, &count);
-    char  buf[2048] = "[";
-    for (int i = 0; i < count; i++) {
-        char ij[256];
-        item_to_json(&arr[i], ij, sizeof(ij));
-        if (i > 0) strncat(buf, ",", sizeof(buf) - strlen(buf) - 1);
-        strncat(buf, ij, sizeof(buf) - strlen(buf) - 1);
-    }
-    strncat(buf, "]", sizeof(buf) - strlen(buf) - 1);
+    char *result = items_to_json_array(arr, count);
     free(arr);
-    return strdup(buf);
+    return result;
 }

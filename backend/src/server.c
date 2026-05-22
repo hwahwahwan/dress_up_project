@@ -5,9 +5,18 @@
 #include "server.h"
 #include "outfit.h"
 
+/* ─── URL 경로 상수 ─── */
+#define URL_ITEMS        "/items"
+#define URL_ITEMS_PREFIX "/items/"
+#define URL_OUTFIT       "/outfit"
+#define URL_HISTORY      "/history"
+#define URL_EQUIP_PREFIX "/equip/"
+#define URL_UNEQUIP_PREFIX "/unequip/"
+#define URL_UNDO         "/undo"
+#define URL_RESET        "/reset"
+
 static struct MHD_Daemon *g_daemon = NULL;
 
-/* JSON 응답 전송 + CORS 헤더 공통 처리 */
 static enum MHD_Result send_json(
     struct MHD_Connection *conn,
     const char *body,
@@ -36,30 +45,29 @@ static enum MHD_Result request_handler(
 {
     (void)cls; (void)version; (void)upload_data; (void)upload_data_size; (void)con_cls;
 
-    /* CORS preflight */
     if (strcmp(method, "OPTIONS") == 0)
         return send_json(conn, "", MHD_HTTP_OK);
 
     char *body = NULL;
 
     if (strcmp(method, "GET") == 0) {
-        if (strcmp(url, "/items") == 0) {
+        if (strcmp(url, URL_ITEMS) == 0) {
             body = outfit_get_all_items();
-        } else if (strncmp(url, "/items/", 7) == 0) {
-            body = outfit_get_items_by_category(url + 7);
-        } else if (strcmp(url, "/outfit") == 0) {
+        } else if (strncmp(url, URL_ITEMS_PREFIX, strlen(URL_ITEMS_PREFIX)) == 0) {
+            body = outfit_get_items_by_category(url + strlen(URL_ITEMS_PREFIX));
+        } else if (strcmp(url, URL_OUTFIT) == 0) {
             body = outfit_get_current();
-        } else if (strcmp(url, "/history") == 0) {
+        } else if (strcmp(url, URL_HISTORY) == 0) {
             body = outfit_get_history();
         }
     } else if (strcmp(method, "POST") == 0) {
-        if (strncmp(url, "/equip/", 7) == 0) {
-            body = outfit_equip(atoi(url + 7));
-        } else if (strncmp(url, "/unequip/", 9) == 0) {
-            body = outfit_unequip(url + 9);
-        } else if (strcmp(url, "/undo") == 0) {
+        if (strncmp(url, URL_EQUIP_PREFIX, strlen(URL_EQUIP_PREFIX)) == 0) {
+            body = outfit_equip(atoi(url + strlen(URL_EQUIP_PREFIX)));
+        } else if (strncmp(url, URL_UNEQUIP_PREFIX, strlen(URL_UNEQUIP_PREFIX)) == 0) {
+            body = outfit_unequip(url + strlen(URL_UNEQUIP_PREFIX));
+        } else if (strcmp(url, URL_UNDO) == 0) {
             body = outfit_undo();
-        } else if (strcmp(url, "/reset") == 0) {
+        } else if (strcmp(url, URL_RESET) == 0) {
             body = outfit_reset();
         }
     }

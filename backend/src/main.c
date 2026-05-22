@@ -5,6 +5,8 @@
 #include "server.h"
 #include "outfit.h"
 
+#define ITEMS_JSON_PATH "data/items.json"
+
 static volatile int running = 1;
 
 static void handle_signal(int sig) {
@@ -16,8 +18,8 @@ int main(void) {
     signal(SIGINT,  handle_signal);
     signal(SIGTERM, handle_signal);
 
-    if (!outfit_init("data/items.json")) {
-        fprintf(stderr, "오류: data/items.json 로딩 실패\n");
+    if (!outfit_init(ITEMS_JSON_PATH)) {
+        fprintf(stderr, "오류: %s 로딩 실패\n", ITEMS_JSON_PATH);
         return 1;
     }
 
